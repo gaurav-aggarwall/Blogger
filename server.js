@@ -10,13 +10,16 @@ app.use(bodyParser.json());
 
 // Connecting to MongoDB
 const db = require('./config/keys').mongoURI;
-mongoose.connect(db, { useNewUrlParser: true })
-  .then(() => console.log('MongoDB Connected'))
+mongoose.connect(db, { 
+    useNewUrlParser: true,
+    useCreateIndex: true 
+  }).then(() => console.log('MongoDB Connected'))
   .catch(err => console.log(err));
 
 
 // Use Routes
-app.use('/api/blog', require('./routes/blog'));
+app.use('/api/blog', require('./routes/blogs'));
+app.use('/api/users', require('./routes/users'));
 
 // Routes
 app.get('/', (req, res) => {
