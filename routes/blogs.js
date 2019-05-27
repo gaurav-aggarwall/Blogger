@@ -21,6 +21,11 @@ router.get('/:id', blogController.getSinglePost);
 router.post('/new', blogController.newBlog);
 
 
+// Editing a particular Blog  
+// ( /api/blog/edit/:id )
+router.put('/edit/:id', blogController.editBlog);
+
+
 // Deleting a Blog  
 // ( /api/blog/delete/:id )
 router.delete('/delete/:id', blogController.deleteBlog);

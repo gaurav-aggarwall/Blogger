@@ -72,17 +72,72 @@ exports.newBlog = (req, res, next) => {
 }
 
 
-// Deleting a blog
-exports.deleteBlog = (req,res) => {
+// Editing a Blog
+exports.editBlog = (req, res, next) => {
+    const { author, title, body, imageURL } = req.body;
     const id = req.params.id;
 
-    if(!id) return res.status(400).json({ message: 'Please select a particular blog to delete' });
+    if(!author || !title || !body || !imageURL){
+        const error = new Error('Please enter all fields');
+        error.statusCode = 422;
+        throw error;
+    }           
 
     Blog.findById(id)
-        .then(blog => {
-            blog.remove()
-                .then( blog => {
-                    res.json({msg: 'Deleted', blog});
-                }).catch(err => res.status(40).json({ message: 'Blog Not Found' }));
-        }).catch(err => res.status(404).json({ msg: 'Blog Not Found' }));
+    .then(blog => {
+        // TODO: Check for logged in user
+
+        if(!blog){
+            const error = new Error('Can not find the blog');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        blog.author = author;
+        blog.title = title;
+        blog.body = body;
+        blog.imageURL = imageURL;
+
+        return blog.save();
+    })
+    .then(result => {
+        res.status(200).json({
+            message: 'Post edited successfully',
+            post: result
+        });
+    })
+    .catch(err => {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    });
+}
+
+
+// Deleting a blog
+exports.deleteBlog = (req, res, next) => {
+    const id = req.params.id;
+
+    Blog.findById(id)
+    .then(blog => {
+        // TODO: Check for logged in user
+
+        if(!blog){
+            const error = new Error('Can not find the blog');
+            error.statusCode = 404;
+            throw error;
+        }
+
+        return Blog.findByIdAndDelete(id);
+    })
+    .then(result => {
+        res.status(200).json({ message: 'Post deleted successfully' });
+    })    
+    .catch(err => {
+        if(!err.statusCode){
+            err.statusCode = 500;
+        }
+        next(err);
+    });
 }
