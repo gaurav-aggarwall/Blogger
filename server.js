@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-var session = require('express-session');
+// var session = require('express-session');
 
 const app = express();
 
@@ -20,17 +20,17 @@ mongoose.connect(db, {
 
 
 // Using sessions for tracking Logins
-app.use(session({
-  name: 'session',
-  secret: 'sessionSecret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    maxAge: (1000*60*60),
-    sameSite: true,
-    secure: false,
-  }
-}));
+// app.use(session({
+//   name: 'session',
+//   secret: 'sessionSecret',
+//   resave: false,
+//   saveUninitialized: false,
+//   cookie: {
+//     maxAge: (1000*60*60),
+//     sameSite: true,
+//     secure: false,
+//   }
+// }));
 
 
 // Use Routes
@@ -40,6 +40,15 @@ app.use('/api/user', require('./routes/users'));
 // Routes
 app.get('/', (req, res) => {
     res.send('hello');
+});
+
+
+// Error Handling
+app.use( (error, req, res, next) => {
+  console.log(error);
+
+  const {statusCode = 500, message } = error;
+  res.status(statusCode).json({message});
 });
 
 

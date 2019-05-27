@@ -1,45 +1,29 @@
 const router = require('express').Router();
 
-// Blog Model
-const Blog = require('../models/Blog');
+
+// Blog Controller
+const blogController = require('../controllers/blogs');
 
 
-// Get - All the blogs
-router.get('/', (req,res) => {
-    Blog.find()
-        .sort({ date: -1 })
-        .then(blogs => res.json(blogs))
-        .catch(err => console.log(err));
-});
+
+// Get all the blogs 
+// ( /api/blog/ )
+router.get('/', blogController.getAll);
 
 
-// Post - New blog
-router.post('/new', (req,res) => {
-    const { author, title, body } = req.body;
-
-    if(!author || !title || !body) return res.status(400).json({ msg: 'Please enter all fields' });
-
-    const newBlog = new Blog({ author, title, body });
-
-    newBlog.save()
-        .then(blog => res.json(blog))
-        .catch(err => console.log(err));
-});
+// Get a particular blog 
+// ( /api/blog/:id )
+router.get('/:id', blogController.getSinglePost);
 
 
-// Delete - A blog with id
-router.delete('/delete/:id', (req,res) => {
-    const id = req.params.id;
+// Adding a new Blog  
+// ( /api/blog/new )
+router.post('/new', blogController.newBlog);
 
-    if(!id) return res.status(400).json({ msg: 'Please select a particular blog to delete' });
 
-    Blog.findById(id)
-        .then(blog => {
-            blog.remove()
-                .then( blog => {
-                    res.json({msg: 'Deleted', blog});
-                }).catch(err => res.status(40).json({ msg: 'Blog Not Found' }));
-        }).catch(err => res.status(404).json({ msg: 'Blog Not Found' }));
-});
+// Deleting a Blog  
+// ( /api/blog/delete/:id )
+router.delete('/delete/:id', blogController.deleteBlog);
+
 
 module.exports = router;
