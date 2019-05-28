@@ -20,12 +20,11 @@ mongoose.connect(db, {
 
 // Application Routes
 app.use('/api/blog', require('./routes/blogs'));
+app.use('/api/comment', require('./routes/comments'));
 app.use('/api/user', require('./routes/users'));
 
 // Routes
-app.get('/', (req, res) => {
-    res.send('hello');
-});
+app.use('/', require('./routes/home'));
 
 
 

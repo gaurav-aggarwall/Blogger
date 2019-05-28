@@ -6,18 +6,18 @@ const authMiddleware = require('../middleware/auth');
 
 
 // Blog Controller
-const blogController = require('../controllers/blogs');
+const blogController = require('../controllers/blog');
 
 
 
 // Get all the blogs 
 // ( /api/blog/ )
-router.get('/', authMiddleware, blogController.getAll);
+router.get('/', blogController.getAll);
 
 
 // Get a particular blog 
 // ( /api/blog/:id )
-router.get('/:id', authMiddleware, blogController.getSinglePost);
+router.get('/:id', blogController.getSinglePost);
 
 
 // Adding a new Blog  

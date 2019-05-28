@@ -102,16 +102,16 @@ exports.editBlog = (req, res, next) => {
     Blog.findById(id)
     .then(blog => {
 
+        if(!blog){
+            const error = new Error('Can not find the blog');
+            error.statusCode = 404;
+            throw error;
+        }
+
         // Authorization
         if((blog.author._id).toString() !== req.userId){
             const error = new Error('Not Authorized');
             error.statusCode = 403;
-            throw error;
-        }
-
-        if(!blog){
-            const error = new Error('Can not find the blog');
-            error.statusCode = 404;
             throw error;
         }
 
@@ -144,6 +144,12 @@ exports.deleteBlog = (req, res, next) => {
     Blog.findById(id)
     .then(blog => {
 
+        if(!blog){
+            const error = new Error('Can not find the blog');
+            error.statusCode = 404;
+            throw error;
+        }
+
         // Authorization
         if((blog.author._id).toString() !== req.userId){
             const error = new Error('Not Authorized');
@@ -151,13 +157,12 @@ exports.deleteBlog = (req, res, next) => {
             throw error;
         }
 
-        if(!blog){
-            const error = new Error('Can not find the blog');
-            error.statusCode = 404;
-            throw error;
-        }
-
         return Blog.findByIdAndDelete(id);
+    })
+    .then(result => User.findById(req.userId))
+    .then(user => {
+        user.blogs.pull(id);
+        return user.save();
     })
     .then(result => {
         res.status(200).json({ message: 'Post deleted successfully' });
