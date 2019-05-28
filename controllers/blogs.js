@@ -1,6 +1,8 @@
 // Blog Model
 const Blog = require('../models/Blog');
 
+// User Model
+const User = require('../models/User');
 
 // Get all the Blogs
 exports.getAll = (req, res, next) => {
@@ -48,7 +50,8 @@ exports.getSinglePost = (req, res, next) => {
 
 // Creating a New Blog
 exports.newBlog = (req, res, next) => {
-    const { author, title, body, imageURL } = req.body;
+    const { title, body, imageURL } = req.body;
+    let author = req.userId;
 
     if(!author || !title || !body || !imageURL){
         const error = new Error('Please enter all fields');
@@ -59,10 +62,22 @@ exports.newBlog = (req, res, next) => {
     const newBlog = new Blog({ author, title, body, imageURL });
 
     newBlog.save()
-    .then(blog => res.status(201).json({
-        message: 'Blog was posted successfully',
-        blog: blog
-    }))
+    .then(blog => User.findById(author))
+    .then(user => {
+        author = user;
+        user.blogs.push(newBlog);
+        return user.save();
+    })
+    .then( blog => {    
+        res.status(201).json({
+            message: 'Blog was posted successfully',
+            blog: newBlog,
+            author: {
+                _id: author._id,
+                name: author.name
+            }
+        });    
+    })
     .catch(err => {
         if(!err.statusCode){
             err.statusCode = 500;
@@ -74,18 +89,25 @@ exports.newBlog = (req, res, next) => {
 
 // Editing a Blog
 exports.editBlog = (req, res, next) => {
-    const { author, title, body, imageURL } = req.body;
+    const { title, body, imageURL } = req.body;
+    let author = req.userId;
     const id = req.params.id;
 
     if(!author || !title || !body || !imageURL){
         const error = new Error('Please enter all fields');
         error.statusCode = 422;
         throw error;
-    }           
+    }   
 
     Blog.findById(id)
     .then(blog => {
-        // TODO: Check for logged in user
+
+        // Authorization
+        if((blog.author._id).toString() !== req.userId){
+            const error = new Error('Not Authorized');
+            error.statusCode = 403;
+            throw error;
+        }
 
         if(!blog){
             const error = new Error('Can not find the blog');
@@ -121,7 +143,13 @@ exports.deleteBlog = (req, res, next) => {
 
     Blog.findById(id)
     .then(blog => {
-        // TODO: Check for logged in user
+
+        // Authorization
+        if((blog.author._id).toString() !== req.userId){
+            const error = new Error('Not Authorized');
+            error.statusCode = 403;
+            throw error;
+        }
 
         if(!blog){
             const error = new Error('Can not find the blog');
