@@ -1,9 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
+import 'materialize-css/dist/css/materialize.min.css';
+
 import './index.css';
+
 import App from './App';
-import * as serviceWorker from './serviceWorker';
+import reducers from './store/reducers/reducer';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+import axios from 'axios';
+window.axios = axios;
 
-serviceWorker.unregister();
+const store = createStore(reducers);
+
+ReactDOM.render(
+    <Provider store={store}>
+        <App />
+    </Provider>, 
+    document.getElementById('root')
+);
+
+
